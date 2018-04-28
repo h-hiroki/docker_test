@@ -1,0 +1,35 @@
+version: '3'
+services:
+  web:
+    image: nginx:1.13.5-alpine
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    volumes:
+      - ./web/default.conf:/etc/nginx/conf.d/default.conf
+      - ./data/html/test1:/var/www/test1
+      - ./data/html/test2:/var/www/test2
+
+  app:
+    build: ./app
+    env_file: .env
+    environment:
+      DATABASE_HOST: db
+    depends_on:
+      - db
+    volumes:
+      - ./data/html/test1:/var/www/test1
+      - ./data/html/test2:/var/www/test2
+
+  db:
+    image: mysql:5.7.19
+    env_file: .env
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./db/initial.sql:/docker-entrypoint-initdb.d/initial.sql
+
+volumes:
+  db-data:
